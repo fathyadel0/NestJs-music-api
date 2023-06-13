@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String?
+  email      String     @unique
+  password   String
+  roles      Roles      @default(USER)
+  facebookId String
+  gmailId    String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  profile    Profile?
+  playlists  Playlist[]
+}
+
+model Profile {
+  id          Int       @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  gender      Gender
+  age         Int
+  city        String
+  country     String
+  address     String
+  phone       String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int       @unique
+  favourite   Favourite @relation(fields: [favouriteId], references: [id])
+  favouriteId Int       @unique
+}
+
+model Singer {
+  id           Int           @id @default(autoincrement())
+  name         String
+  info         String
+  photo        String
+  type         SingerType
+  gender       Gender
+  nationality  String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  singerAlbums SingerAlbum[]
+}
+
+model Musician {
+  id             Int             @id @default(autoincrement())
+  name           String
+  info           String
+  photo          String
+  type           String
+  gender         Gender
+  nationality    String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  musicianAlbums MusicianAlbum[]
+}
+
+model MusicianAlbum {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  image      String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Musician   Musician? @relation(fields: [musicianId], references: [id])
+  musicianId Int?
+  musics     Music[]
+}
+
+model SingerAlbum {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Singer    Singer?  @relation(fields: [singerId], references: [id])
+  singerId  Int?
+  songs     Song[]
+}
+
+model Song {
+  id            Int          @id @default(autoincrement())
+  name          String
+  description   String
+  artist        String
+  type          SongType
+  language      String
+  rate          Int
+  source        String
+  image         String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  SingerAlbum   SingerAlbum? @relation(fields: [singerAlbumId], references: [id])
+  singerAlbumId Int?
+  tracks        Track[]
+}
+
+model Music {
+  id              Int            @id @default(autoincrement())
+  name            String
+  description     String
+  artist          String
+  type            MusicType
+  language        String
+  rate            Int
+  source          String
+  image           String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  MusicianAlbum   MusicianAlbum? @relation(fields: [musicianAlbumId], references: [id])
+  musicianAlbumId Int?
+  tracks          Track[]
+}
+
+model Favourite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile   Profile?
+  tracks    Track[]
+}
+
+model Playlist {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  tracks    Track[]
+}
+
+model Track {
+  id          Int        @id @default(autoincrement())
+  title       String
+  link        String
+  index       Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  Song        Song?      @relation(fields: [songId], references: [id])
+  songId      Int?
+  Music       Music?     @relation(fields: [musicId], references: [id])
+  musicId     Int?
+  Favourite   Favourite? @relation(fields: [favouriteId], references: [id])
+  favouriteId Int?
+  Playlist    Playlist?  @relation(fields: [playlistId], references: [id])
+  playlistId  Int?
+}
+
+enum Roles {
+  USER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum SingerType {
+  SINGLE
+  MUSIC_BAND
+}
+
+enum SongType {
+  CLASSICAL
+  POP
+  ROCK
+  METAL
+  COUNTRY
+  HIP_HOP
+  BALLADS
+  DANCE
+  LOVE
+  GOSPEL
+}
+
+enum MusicType {
+  PIANO
+  KEYBOARD
+  RECORDER
+  CLASSICAL_GUITAR
+  DRUM
+  ELECTRIC_GUITAR
+  VIOLIN
+  BASS_GUITAR
+  SAXOPHONE
+  FLUTE
+  CELLO
+  CLARINET
+  TRUMPET
+  HARP
+}
