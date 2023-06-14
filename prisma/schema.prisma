@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  name       String?
-  email      String     @unique
-  password   String
-  roles      Roles      @default(USER)
-  facebookId String
-  gmailId    String
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  profile    Profile?
-  playlists  Playlist[]
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String     @unique
+  password     String
+  role         Role       @default(USER)
+  facebookId   String?
+  gmailId      String?
+  refreshToken String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  profile      Profile?
+  playlists    Playlist[]
 }
 
 model Profile {
@@ -67,7 +68,7 @@ model Musician {
 
 model MusicianAlbum {
   id         Int       @id @default(autoincrement())
-  name       String    @unique
+  name       String
   image      String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -156,7 +157,7 @@ model Track {
   playlistId  Int?
 }
 
-enum Roles {
+enum Role {
   USER
   ADMIN
 }
