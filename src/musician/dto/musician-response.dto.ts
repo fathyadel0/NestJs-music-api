@@ -1,11 +1,10 @@
-import { Gender } from '@prisma/client';
+import { Gender, MusicianType } from '@prisma/client';
 
 export class MusicianResponseDto {
-  id: number;
   name: string;
   info: string;
   photo: string;
-  type: string;
+  type: MusicianType;
   gender: Gender;
   nationality: string;
   createdAt: Date;

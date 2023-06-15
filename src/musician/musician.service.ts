@@ -1,15 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMusicianDto } from './dto/create-musician.dto';
-import { MusicianResponseDto } from './musician-response.dto';
-import { MusicianAlbumService } from 'src/musician-album/musician-album.service';
+import { MusicianResponseDto } from './dto/musician-response.dto';
+import { UpdateMusicianDto } from './dto/update-musician.dto';
+import { QueryMusicianDto } from './dto/query-musician.dto';
+import { CreateMusicianAlbumDto } from './dto/create-album.dto';
+import { MusicianAlbum } from '@prisma/client';
 
 @Injectable()
 export class MusicianService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly musicianAlbumService: MusicianAlbumService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private selectedMusicianData = {
     id: true,
@@ -21,26 +21,59 @@ export class MusicianService {
     nationality: true,
     createdAt: true,
     updatedAt: true,
-    musicianAlbums: {
-      select: { id: true, name: true, image: true },
-      take: 1,
-    },
+    musicianAlbums: { select: { id: true, name: true, image: true }, take: 1 },
   };
 
-  async create(musicianData: CreateMusicianDto): Promise<MusicianResponseDto> {
-    const { musicianAlbums, ...others } = musicianData;
+  async getAll(): Promise<MusicianResponseDto[]> {
+    return await this.prisma.musician.findMany({ select: this.selectedMusicianData });
+  }
 
-    const musician = await this.prisma.musician.create({
-      data: { ...others },
+  async getFiltered(musicianQuery: QueryMusicianDto): Promise<MusicianResponseDto[]> {
+    console.log(musicianQuery);
+    return await this.prisma.musician.findMany({
+      where: {
+        name: musicianQuery?.name,
+        type: musicianQuery?.type,
+        gender: musicianQuery?.gender,
+        nationality: musicianQuery?.nationality,
+      },
       select: this.selectedMusicianData,
     });
+  }
 
-    const musicianAlbumData = musicianAlbums.map((musicianAlbum) => {
-      return { ...musicianAlbum, musicianId: musician.id };
+  async getOne(musicianId: number): Promise<MusicianResponseDto> {
+    const musician = await this.prisma.musician.findUnique({
+      where: { id: musicianId },
+      select: this.selectedMusicianData,
     });
-
-    await this.musicianAlbumService.create(musicianAlbumData[0]);
-
+    if (!musician) {
+      throw new NotFoundException('Musician not found!');
+    }
     return musician;
+  }
+
+  async create(musicianData: CreateMusicianDto): Promise<MusicianResponseDto> {
+    return await this.prisma.musician.create({ data: musicianData, select: this.selectedMusicianData });
+  }
+
+  async update(musicianId: number, musicianData: UpdateMusicianDto): Promise<MusicianResponseDto> {
+    await this.getOne(musicianId);
+    return await this.prisma.musician.update({
+      where: { id: musicianId },
+      select: this.selectedMusicianData,
+      data: musicianData,
+    });
+  }
+
+  async delete(musicianId: number): Promise<void> {
+    await this.getOne(musicianId);
+    await this.prisma.musicianAlbum.deleteMany({ where: { musicianId } });
+    await this.prisma.musician.delete({ where: { id: musicianId } });
+  }
+
+  async newAlbum(musicianId: number, newAlbumData: CreateMusicianAlbumDto): Promise<MusicianAlbum> {
+    await this.getOne(musicianId);
+    const newAlbum = { ...newAlbumData, musicianId };
+    return await this.prisma.musicianAlbum.create({ data: newAlbum });
   }
 }
