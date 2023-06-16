@@ -136,13 +136,17 @@ export class AuthService {
 
   async logout(decodedUser: DecodedUserType, response: Response): Promise<void> {
     const { email } = decodedUser;
+
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new ForbiddenException('User not found!');
     }
+
     await this.prisma.user.update({ where: { id: user.id }, data: { refreshToken: null } });
+
     await response.clearCookie('accessToken');
     await response.clearCookie('refreshToken');
+
     response.end();
   }
 }
