@@ -1,7 +1,7 @@
-import { SongType } from '@prisma/client';
+import { MusicType } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class CreateSongDto {
+export class CreateMusicDto {
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -15,8 +15,8 @@ export class CreateSongDto {
   artist: string;
 
   @IsNotEmpty()
-  @IsEnum(SongType)
-  type: SongType;
+  @IsEnum(MusicType)
+  type: MusicType;
 
   @IsNotEmpty()
   @IsString()

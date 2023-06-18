@@ -60,11 +60,17 @@ export class AuthService {
 
   private async updateRefreshToken(userId: number, refreshToken: string): Promise<void> {
     const hashedRefreshToken = await hash(refreshToken);
-    await this.prisma.user.update({ where: { id: userId }, data: { refreshToken: hashedRefreshToken } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashedRefreshToken },
+    });
   }
 
   private async findByEmail(email: string): Promise<UserResponseDto> {
-    return await this.prisma.user.findUnique({ where: { email }, select: this.selectedUser });
+    return await this.prisma.user.findUnique({
+      where: { email },
+      select: this.selectedUser,
+    });
   }
 
   async signup(signupData: CreateSignupDto): Promise<UserResponseDto> {
@@ -80,7 +86,10 @@ export class AuthService {
     signupData.password = hashedPassword;
     signupData.email = email;
 
-    const user = await this.prisma.user.create({ data: signupData, select: this.selectedUser });
+    const user = await this.prisma.user.create({
+      data: signupData,
+      select: this.selectedUser,
+    });
 
     delete user.password;
     return user;
@@ -142,7 +151,10 @@ export class AuthService {
       throw new ForbiddenException('User not found!');
     }
 
-    await this.prisma.user.update({ where: { id: user.id }, data: { refreshToken: null } });
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: null },
+    });
 
     await response.clearCookie('accessToken');
     await response.clearCookie('refreshToken');

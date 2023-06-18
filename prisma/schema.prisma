@@ -34,9 +34,9 @@ model Profile {
   phone       String    @unique
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int       @unique
-  favourite   Favourite @relation(fields: [favouriteId], references: [id])
+  favourite   Favourite @relation(fields: [favouriteId], references: [id], onDelete: Cascade)
   favouriteId Int       @unique
 }
 
@@ -72,24 +72,24 @@ model MusicianAlbum {
   image      String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  Musician   Musician? @relation(fields: [musicianId], references: [id])
+  Musician   Musician? @relation(fields: [musicianId], references: [id], onDelete: Cascade)
   musicianId Int?
   musics     Music[]
 }
 
 model SingerAlbum {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
+  name      String
   image     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Singer    Singer?  @relation(fields: [singerId], references: [id])
+  Singer    Singer?  @relation(fields: [singerId], references: [id], onDelete: Cascade)
   singerId  Int?
   songs     Song[]
 }
 
 model Song {
-  id            Int          @id @default(autoincrement())
+  id            Int              @id @default(autoincrement())
   name          String
   description   String
   artist        String
@@ -98,15 +98,17 @@ model Song {
   rate          Int
   source        String
   image         String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  SingerAlbum   SingerAlbum? @relation(fields: [singerAlbumId], references: [id])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  SingerAlbum   SingerAlbum?     @relation(fields: [singerAlbumId], references: [id], onDelete: Cascade)
   singerAlbumId Int?
   tracks        Track[]
+  playlists     SongPlaylists[]
+  favourites    SongFavourites[]
 }
 
 model Music {
-  id              Int            @id @default(autoincrement())
+  id              Int               @id @default(autoincrement())
   name            String
   description     String
   artist          String
@@ -115,29 +117,35 @@ model Music {
   rate            Int
   source          String
   image           String
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  MusicianAlbum   MusicianAlbum? @relation(fields: [musicianAlbumId], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  MusicianAlbum   MusicianAlbum?    @relation(fields: [musicianAlbumId], references: [id], onDelete: Cascade)
   musicianAlbumId Int?
   tracks          Track[]
+  playlists       MusicPlaylists[]
+  favourites      MusicFavourites[]
 }
 
 model Favourite {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int               @id @default(autoincrement())
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   profile   Profile?
   tracks    Track[]
+  musics    MusicFavourites[]
+  songs     SongFavourites[]
 }
 
 model Playlist {
-  id        Int      @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  User      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int?
   tracks    Track[]
+  musics    MusicPlaylists[]
+  songs     SongPlaylists[]
 }
 
 model Track {
@@ -147,14 +155,50 @@ model Track {
   index       Int
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  Song        Song?      @relation(fields: [songId], references: [id])
+  Song        Song?      @relation(fields: [songId], references: [id], onDelete: Cascade)
   songId      Int?
-  Music       Music?     @relation(fields: [musicId], references: [id])
+  Music       Music?     @relation(fields: [musicId], references: [id], onDelete: Cascade)
   musicId     Int?
-  Favourite   Favourite? @relation(fields: [favouriteId], references: [id])
+  Favourite   Favourite? @relation(fields: [favouriteId], references: [id], onDelete: Cascade)
   favouriteId Int?
-  Playlist    Playlist?  @relation(fields: [playlistId], references: [id])
+  Playlist    Playlist?  @relation(fields: [playlistId], references: [id], onDelete: Cascade)
   playlistId  Int?
+}
+
+model MusicPlaylists {
+  Music      Music    @relation(fields: [musicId], references: [id], onDelete: Cascade)
+  musicId    Int
+  Playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId Int
+
+  @@id([musicId, playlistId])
+}
+
+model MusicFavourites {
+  Music       Music     @relation(fields: [musicId], references: [id])
+  musicId     Int
+  Favourite   Favourite @relation(fields: [favouriteId], references: [id])
+  favouriteId Int
+
+  @@id([musicId, favouriteId])
+}
+
+model SongPlaylists {
+  Playlist   Playlist @relation(fields: [playlistId], references: [id])
+  playlistId Int
+  Song       Song     @relation(fields: [songId], references: [id])
+  songId     Int
+
+  @@id([songId, playlistId])
+}
+
+model SongFavourites {
+  Song        Song      @relation(fields: [songId], references: [id])
+  songId      Int
+  Favourite   Favourite @relation(fields: [favouriteId], references: [id])
+  favouriteId Int
+
+  @@id([songId, favouriteId])
 }
 
 enum Role {

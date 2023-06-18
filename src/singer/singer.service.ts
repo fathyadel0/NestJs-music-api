@@ -4,8 +4,9 @@ import { SingerResponseDto } from './dto/singer-response.dto';
 import { QuerySingerDto } from './dto/query-singer.dto';
 import { CreateSingerDto } from './dto/create-singer.dto';
 import { UpdateSingerDto } from './dto/update-singer.dto';
-import { CreateSingerAlbumDto } from './dto/create-album.dto';
 import { SingerAlbum } from '@prisma/client';
+import { CreateSingerAlbumDto } from 'src/singer-album/dto/create-singer-album.dto';
+import { SingerAlbumResponseDto } from 'src/singer-album/dto/singer-album-response.dto';
 
 @Injectable()
 export class SingerService {
@@ -25,7 +26,9 @@ export class SingerService {
   };
 
   async getAll(): Promise<SingerResponseDto[]> {
-    return await this.prisma.singer.findMany({ select: this.selectedSingerData });
+    return await this.prisma.singer.findMany({
+      select: this.selectedSingerData,
+    });
   }
 
   async getFiltered(singerQuery: QuerySingerDto): Promise<SingerResponseDto[]> {
@@ -52,10 +55,16 @@ export class SingerService {
   }
 
   async create(singerData: CreateSingerDto): Promise<SingerResponseDto> {
-    return await this.prisma.singer.create({ data: singerData, select: this.selectedSingerData });
+    return await this.prisma.singer.create({
+      data: singerData,
+      select: this.selectedSingerData,
+    });
   }
 
-  async update(singerId: number, singerData: UpdateSingerDto): Promise<SingerResponseDto> {
+  async update(
+    singerId: number,
+    singerData: UpdateSingerDto,
+  ): Promise<SingerResponseDto> {
     await this.getOne(singerId);
     return await this.prisma.singer.update({
       where: { id: singerId },
@@ -66,11 +75,14 @@ export class SingerService {
 
   async delete(singerId: number): Promise<void> {
     await this.getOne(singerId);
-    await this.prisma.singerAlbum.deleteMany({ where: { singerId } });
+    // await this.prisma.singerAlbum.deleteMany({ where: { singerId } });
     await this.prisma.singer.delete({ where: { id: singerId } });
   }
 
-  async newAlbum(singerId: number, newAlbumData: CreateSingerAlbumDto): Promise<SingerAlbum> {
+  async newAlbum(
+    singerId: number,
+    newAlbumData: CreateSingerAlbumDto,
+  ): Promise<SingerAlbumResponseDto> {
     await this.getOne(singerId);
     const newAlbum = { ...newAlbumData, singerId };
     return await this.prisma.singerAlbum.create({ data: newAlbum });

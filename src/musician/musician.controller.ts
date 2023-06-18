@@ -32,19 +32,25 @@ export class MusicianController {
 
   @UseGuards(AtGuard)
   @Get('filtered')
-  async getFiltered(@Query() musicianQuery: QueryMusicianDto): Promise<MusicianResponseDto[]> {
+  async getFiltered(
+    @Query() musicianQuery: QueryMusicianDto,
+  ): Promise<MusicianResponseDto[]> {
     return await this.musicianService.getFiltered(musicianQuery);
   }
 
   @UseGuards(AtGuard)
   @Get(':musicianId')
-  async getOne(@Param('musicianId', ParseIntPipe) musicianId: number): Promise<MusicianResponseDto> {
+  async getOne(
+    @Param('musicianId', ParseIntPipe) musicianId: number,
+  ): Promise<MusicianResponseDto> {
     return await this.musicianService.getOne(musicianId);
   }
 
   @UseGuards(AtGuard)
   @Post()
-  async create(@Body() musicianData: CreateMusicianDto): Promise<MusicianResponseDto> {
+  async create(
+    @Body() musicianData: CreateMusicianDto,
+  ): Promise<MusicianResponseDto> {
     return await this.musicianService.create(musicianData);
   }
 
@@ -60,7 +66,9 @@ export class MusicianController {
   @UseGuards(AtGuard)
   @HttpCode(204)
   @Delete(':musicianId')
-  async delete(@Param('musicianId', ParseIntPipe) musicianId: number): Promise<void> {
+  async delete(
+    @Param('musicianId', ParseIntPipe) musicianId: number,
+  ): Promise<void> {
     return await this.musicianService.delete(musicianId);
   }
 

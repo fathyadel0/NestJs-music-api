@@ -25,11 +25,14 @@ export class MusicianService {
   };
 
   async getAll(): Promise<MusicianResponseDto[]> {
-    return await this.prisma.musician.findMany({ select: this.selectedMusicianData });
+    return await this.prisma.musician.findMany({
+      select: this.selectedMusicianData,
+    });
   }
 
-  async getFiltered(musicianQuery: QueryMusicianDto): Promise<MusicianResponseDto[]> {
-    console.log(musicianQuery);
+  async getFiltered(
+    musicianQuery: QueryMusicianDto,
+  ): Promise<MusicianResponseDto[]> {
     return await this.prisma.musician.findMany({
       where: {
         name: musicianQuery?.name,
@@ -53,10 +56,16 @@ export class MusicianService {
   }
 
   async create(musicianData: CreateMusicianDto): Promise<MusicianResponseDto> {
-    return await this.prisma.musician.create({ data: musicianData, select: this.selectedMusicianData });
+    return await this.prisma.musician.create({
+      data: musicianData,
+      select: this.selectedMusicianData,
+    });
   }
 
-  async update(musicianId: number, musicianData: UpdateMusicianDto): Promise<MusicianResponseDto> {
+  async update(
+    musicianId: number,
+    musicianData: UpdateMusicianDto,
+  ): Promise<MusicianResponseDto> {
     await this.getOne(musicianId);
     return await this.prisma.musician.update({
       where: { id: musicianId },
@@ -67,11 +76,14 @@ export class MusicianService {
 
   async delete(musicianId: number): Promise<void> {
     await this.getOne(musicianId);
-    await this.prisma.musicianAlbum.deleteMany({ where: { musicianId } });
+    // await this.prisma.musicianAlbum.deleteMany({ where: { musicianId } });
     await this.prisma.musician.delete({ where: { id: musicianId } });
   }
 
-  async newAlbum(musicianId: number, newAlbumData: CreateMusicianAlbumDto): Promise<MusicianAlbum> {
+  async newAlbum(
+    musicianId: number,
+    newAlbumData: CreateMusicianAlbumDto,
+  ): Promise<MusicianAlbum> {
     await this.getOne(musicianId);
     const newAlbum = { ...newAlbumData, musicianId };
     return await this.prisma.musicianAlbum.create({ data: newAlbum });
